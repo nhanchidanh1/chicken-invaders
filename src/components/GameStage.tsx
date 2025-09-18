@@ -2,6 +2,7 @@ import React, { useReducer, useCallback, useEffect, useRef, useState } from 'rea
 import { GameData, GameState, GameSettings, PowerUpType } from '../types/game';
 import { useGameLoop } from '../hooks/useGameLoop';
 import { useKeyboard } from '../hooks/useKeyboard';
+import { useMouse } from '../hooks/useMouse';
 import { gameReducer, initialGameState, GameAction } from '../reducers/gameReducer';
 import { Player } from './Player';
 import { Chicken } from './Chicken';
@@ -17,6 +18,8 @@ import { clamp, canPlayerFire } from '../utils/gameLogic';
 export const GameStage: React.FC = () => {
   const [gameData, dispatch] = useReducer(gameReducer, initialGameState);
   const { keys } = useKeyboard();
+  const gameContainerRef = useRef<HTMLDivElement>(null);
+  const mouseState = useMouse(gameContainerRef);
   const mobileMove = useRef<'left' | 'right' | null>(null);
   const [screenSize, setScreenSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
@@ -47,10 +50,10 @@ export const GameStage: React.FC = () => {
     return {
       playfield: { width: playfieldWidth, height: playfieldHeight },
       playerSpeed: 350 * sizeScale,
-      bulletSpeed: 450 * sizeScale,
-      chickenSpeed: 40 * sizeScale,
-      eggSpeed: 180 * sizeScale,
-      fireRate: 200,
+      bulletSpeed: 500 * sizeScale,
+      chickenSpeed: 30 * sizeScale, // Slower chicken movement
+      eggSpeed: 120 * sizeScale, // Much slower egg speed for easier gameplay
+      fireRate: 150, // Faster fire rate for smoother shooting
       chickenRows: 4,
       chickenCols: Math.min(Math.floor(playfieldWidth / 80), 12) // Adaptive column count
     };
@@ -62,14 +65,26 @@ export const GameStage: React.FC = () => {
   const updateGame = useCallback((deltaTime: number) => {
     if (gameData.gameState !== GameState.PLAYING) return;
 
-    const dt = deltaTime / 1000; // Convert to seconds
+    const dt = Math.min(deltaTime / 1000, 1/30); // Cap delta time for smoother movement
 
-    // Handle player input (both keyboard and mobile)
+    // Handle player input (mouse, keyboard, and mobile)
     let playerDx = 0;
-    if (keys.current.ArrowLeft || keys.current.KeyA || mobileMove.current === 'left') {
-      playerDx -= gameSettings.playerSpeed * dt;
+    
+    // Mouse control - smooth following
+    if (mouseState.x > 0) {
+      const targetX = mouseState.x - gameData.player.width / 2;
+      const currentX = gameData.player.x;
+      const distance = targetX - currentX;
+      
+      // Smooth movement towards mouse position
+      if (Math.abs(distance) > 5) {
+        playerDx = Math.sign(distance) * Math.min(Math.abs(distance) * 8 * dt, gameSettings.playerSpeed * dt);
+      }
     }
-    if (keys.current.ArrowRight || keys.current.KeyD || mobileMove.current === 'right') {
+    // Keyboard fallback
+    else if (keys.current.ArrowLeft || keys.current.KeyA || mobileMove.current === 'left') {
+      playerDx -= gameSettings.playerSpeed * dt;
+    } else if (keys.current.ArrowRight || keys.current.KeyD || mobileMove.current === 'right') {
       playerDx += gameSettings.playerSpeed * dt;
     }
 
@@ -83,8 +98,8 @@ export const GameStage: React.FC = () => {
       dispatch({ type: 'UPDATE_PLAYER_POSITION', payload: { x: newX, y: gameData.player.y } });
     }
 
-    // Handle shooting
-    if (keys.current.Space) {
+    // Handle shooting (mouse left click or spacebar)
+    if (mouseState.isPressed || keys.current.Space) {
       const hasRapidFire = (gameData.activePowerUps[PowerUpType.RAPID_FIRE] || 0) > 0;
       if (canPlayerFire(gameData.lastShotTime, gameSettings.fireRate, hasRapidFire)) {
         dispatch({ type: 'PLAYER_SHOOT' });
@@ -93,7 +108,7 @@ export const GameStage: React.FC = () => {
 
     // Update game entities
     dispatch({ type: 'UPDATE_GAME', payload: { deltaTime, settings: gameSettings } });
-  }, [gameData, keys, gameSettings]);
+  }, [gameData, keys, mouseState, gameSettings]);
 
   useGameLoop({
     onUpdate: updateGame,
@@ -177,10 +192,12 @@ export const GameStage: React.FC = () => {
   return (
     <div className="fixed inset-0 bg-gradient-to-b from-purple-900 via-blue-900 to-black overflow-hidden">
       <div 
+        ref={gameContainerRef}
         className="relative w-full h-full bg-gradient-to-b from-blue-950 via-purple-950 to-black overflow-hidden"
         style={{
           width: `${gameSettings.playfield.width}px`,
-          height: `${gameSettings.playfield.height}px`
+          height: `${gameSettings.playfield.height}px`,
+          cursor: gameData.gameState === GameState.PLAYING ? 'none' : 'default'
         }}
       >
         {/* Enhanced background stars effect - responsive count */}
@@ -287,8 +304,10 @@ export const GameStage: React.FC = () => {
         )}
 
         {/* Fullscreen toggle hint */}
-        <div className="absolute top-20 right-4 text-white text-sm opacity-60 hidden lg:block">
-          Press F11 for fullscreen
+        <div className="absolute top-20 right-4 text-white text-sm opacity-60 hidden lg:block space-y-1">
+          <div>🖱️ Move mouse to control</div>
+          <div>🖱️ Left click to shoot</div>
+          <div>Press F11 for fullscreen</div>
         </div>
       </div>
     </div>

@@ -145,7 +145,7 @@ export const gameReducer = (state: GameData, action: GameAction): GameData => {
 
       // Update chicken movement - responsive to screen size
       newState.chickenMoveTimer += deltaTime;
-      const moveInterval = 1200 / (settings.chickenSpeed * getWaveDifficulty(newState.wave));
+      const moveInterval = 1500 / (settings.chickenSpeed * getWaveDifficulty(newState.wave)); // Slower movement
       
       if (newState.chickenMoveTimer >= moveInterval) {
         const bounds = getChickenFormationBounds(newState.chickens);
@@ -175,7 +175,7 @@ export const gameReducer = (state: GameData, action: GameAction): GameData => {
 
       // Chicken egg dropping
       newState.eggDropTimer += deltaTime;
-      const eggDropInterval = 3000 / getWaveDifficulty(newState.wave);
+      const eggDropInterval = 4000 / getWaveDifficulty(newState.wave); // Less frequent egg drops
       
       if (newState.eggDropTimer >= eggDropInterval) {
         if (newState.chickens.length > 0) {

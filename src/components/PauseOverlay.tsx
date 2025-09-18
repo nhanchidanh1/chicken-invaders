@@ -15,14 +15,24 @@ export const PauseOverlay: React.FC<PauseOverlayProps> = ({ onResume }) => {
           <div className="text-sm md:text-lg flex items-center justify-between">
             <span>Move:</span>
             <div className="space-x-1 md:space-x-2">
-              <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">←→</kbd>
-              <span className="text-gray-400 text-xs md:text-sm">or</span>
-              <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">A D</kbd>
+              <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">🖱️ Mouse</kbd>
             </div>
           </div>
           <div className="text-sm md:text-lg flex items-center justify-between">
             <span>Shoot:</span>
-            <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">Space</kbd>
+            <div className="space-x-1 md:space-x-2">
+              <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">🖱️ Left Click</kbd>
+              <span className="text-gray-400 text-xs md:text-sm">or</span>
+              <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">Space</kbd>
+            </div>
+          </div>
+          <div className="text-sm md:text-lg flex items-center justify-between">
+            <span>Keyboard Move:</span>
+            <div className="space-x-1 md:space-x-2">
+              <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">←→</kbd>
+              <span className="text-gray-400 text-xs md:text-sm">or</span>
+              <kbd className="bg-gray-700 px-2 md:px-3 py-1 rounded text-xs md:text-sm">A D</kbd>
+            </div>
           </div>
           <div className="text-sm md:text-lg flex items-center justify-between">
             <span>Pause:</span>
