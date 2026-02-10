@@ -59,7 +59,8 @@ export const GameStage: React.FC = () => {
     };
   }, [screenSize]);
 
-  const gameSettings = getResponsiveSettings();
+  // Memoize game settings to prevent recalculation on every render
+  const gameSettings = useMemo(() => getResponsiveSettings(), [getResponsiveSettings]);
 
   // Game loop with improved controls
   const updateGame = useCallback((deltaTime: number) => {
