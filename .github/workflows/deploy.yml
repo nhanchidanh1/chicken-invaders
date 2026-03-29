@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: ["main"] # Hoặc "master" tùy tên nhánh chính của bạn
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22" # Cập nhật lên Node 22 (ổn định hơn cho hiện tại)
           cache: "npm"
       
       - name: Install dependencies
